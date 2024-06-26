@@ -47,7 +47,6 @@ const loginUser = asyncHandler(async(req, res) => {
         email: authenticatedUser.email,
         mobile: authenticatedUser.mobile,
         role: authenticatedUser.role,
-        password,
         token: generateToken(authenticatedUser._id)
       }
       res.json(response);

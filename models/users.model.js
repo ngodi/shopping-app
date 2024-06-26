@@ -28,7 +28,20 @@ const userSchema= new mongoose.Schema(
     role: {
       type: String,
       default: "user",
-    }
+    },
+    cart: {
+      type: Array,
+      default: [],
+    },
+    address: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address"}],
+    whishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product"}],
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
   }
 );
 

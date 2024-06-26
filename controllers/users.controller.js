@@ -12,7 +12,7 @@ const getUsers = asyncHandler (async (req, res) => {
 
 const getUser = asyncHandler(async (req, res) => {
   try {
-    const user = await User.findById(req.params.id, "-password");
+    const user = req.user;
     res.json({user});
   } catch (error) {
     throw new Error(error)
@@ -46,9 +46,39 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 });
 
+const blockUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { isBlocked: true },
+      { new: true }
+    );
+    res.json({message: "User blocked"});
+  } catch (error) {
+    throw new Error(error)
+  }
+});
+
+const unBlockUser = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { isBlocked: false },
+      { new: true }
+    );
+    res.json({message: "User unBlocked"});
+  } catch (error) {
+    throw new Error(error)
+  }
+});
+
 module.exports = {
   getUsers,
   getUser,
   deleteUser,
-  updateUser
+  updateUser,
+  blockUser,
+  unBlockUser,
 };

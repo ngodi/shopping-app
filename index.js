@@ -5,10 +5,12 @@ const dotenv = require("dotenv").config();
 const PORT = process.env.PORT || "4000";
 
 const authRouter = require("./routes/auth.routes");
+const { notFound, errorHandler } = require("./middlewares/errorHandler");
 dbConnect();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use(notFound);
+app.use(errorHandler);
 app.use("/api/v1/users", authRouter);
 
 app.listen(PORT, () => {

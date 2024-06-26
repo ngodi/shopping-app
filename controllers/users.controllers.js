@@ -1,3 +1,4 @@
+const { generateToken } = require("../lib/jsonWebToken");
 const User = require("../models/users.model");
 const asyncHandler = require("express-async-handler");
 
@@ -15,7 +16,8 @@ const registerUser = asyncHandler( async(req, res) => {
         lastName: newUser.lastName,
         email: newUser.email,
         mobile: newUser.mobile,
-        role: newUser.role
+        role: newUser.role,
+        token: generateToken(newUser._id)
       }
     
       res.json(response);
@@ -32,6 +34,32 @@ const registerUser = asyncHandler( async(req, res) => {
   }
 });
 
+const loginUser = asyncHandler(async(req, res) => {
+  try {
+    const { email, password } = req.body;
+    const authenticatedUser = await User.findOne({email});
+   
+    if (authenticatedUser && (await authenticatedUser.passwordMatches(password))) {
+      const response = {
+        _id: authenticatedUser._id,
+        firstName: authenticatedUser.firstName,
+        lastName: authenticatedUser.lastName,
+        email: authenticatedUser.email,
+        mobile: authenticatedUser.mobile,
+        role: authenticatedUser.role,
+        password,
+        token: generateToken(authenticatedUser._id)
+      }
+      res.json(response);
+    } else {
+      throw new Error("User authentication failed");
+    }
+  } catch(error) {
+    throw new Error(error)
+  }
+});
+
 module.exports = {
   registerUser,
+  loginUser
 }

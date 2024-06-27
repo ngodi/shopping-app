@@ -1,5 +1,8 @@
 const User = require("../models/users.model");
 const asyncHandler = require("express-async-handler");
+const validateMongodbId = require("../utils/validateMongoDbId");
+const jwt = require("jsonwebtoken");
+const { generateToken } = require("../lib/jsonWebToken");
 
 const getUsers = asyncHandler (async (req, res) => {
   try {
@@ -48,6 +51,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
 const blockUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // validateMongodbId(id);
   try {
     await User.findByIdAndUpdate(
       id,
@@ -62,6 +66,7 @@ const blockUser = asyncHandler(async (req, res) => {
 
 const unBlockUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  // validateMongodbId(id);
   try {
     await User.findByIdAndUpdate(
       id,
@@ -74,6 +79,21 @@ const unBlockUser = asyncHandler(async (req, res) => {
   }
 });
 
+const handleRefreshToken = asyncHandler(async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie?.refreshToken) throw new Error("No refresh token in cookies");
+  const refreshToken = cookie.refreshToken;
+  const user = await User.findOne({ refreshToken });
+  if (!user) throw new Error("No refresh token in cookies");
+  jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
+    if (err || user.id !== decoded.id) {
+      throw new Error("an error occured with refresh token");
+    }
+    const accessToken = generateToken(user?._id);
+    res.json({ accessToken });
+  })
+})
+
 module.exports = {
   getUsers,
   getUser,
@@ -81,4 +101,5 @@ module.exports = {
   updateUser,
   blockUser,
   unBlockUser,
+  handleRefreshToken,
 };
